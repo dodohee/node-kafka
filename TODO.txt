@@ -1,0 +1,5 @@
+- call rd_kafka_poll in separate thread
+- implement Event.sent
+- implement Event.delivery
+- implement Event.error
+

@@ -1,7 +1,7 @@
 {
   "name": "node-kafka",
   "description": "a node binding for librdkafka",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "homepage": "https://github.com/sutoiku/node-kafka",
   "author": "Pascal Belloncle, psq@stoic.com",
   "contributors": [

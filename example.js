@@ -12,8 +12,4 @@ producer.connect(function() {
   producer.send('message bytes 2', 0);
   producer.send('message bytes 3', 0);
   producer.send('message bytes 4', 0);
-  // setTimeout(function() {
-    console.log("calling cleanup");
-    producer.cleanup();
-  // }, 2000);
 })

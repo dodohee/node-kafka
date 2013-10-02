@@ -45,8 +45,37 @@ node-gyp build
 node-gyp rebuild
 ```
 
+## EXAMPLE
+```javascript
+var kafka = require("./lib/kafka");
+
+var producer = new kafka.Producer({
+  brokers: "localhost:9092",
+  partition: 0,
+  topic: "test"
+});
+
+producer.connect(function() {
+  var req1 = producer.send('message, 0, function(err) {
+    ...
+  });
+  req1.on("sent", function(err) {
+    ...
+  });
+  req1.on("delivery", function(err, length) {
+    ...
+  });
+  req1.on("error", function(err) {
+    ...
+  });
+})
+```
+
 ## TEST
 ```bash
 node example.js
 node example2.js
 ```
+
+## LICENSE
+See LICENSE, and LICENSE.* for dependencies

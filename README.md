@@ -59,16 +59,13 @@ var producer = new kafka.Producer({
 });
 
 producer.connect(function() {
-  var req1 = producer.send('message', 0, function(err) {
+  producer.send('message', 0, function(err) {
     ...
-  });
-  req1.on("sent", function(err) {
+  }).on("sent", function(err) {
     ...
-  });
-  req1.on("delivery", function(err, length) {
+  }).on("delivery", function(err, length) {
     ...
-  });
-  req1.on("error", function(err) {
+  }).on("error", function(err) {
     ...
   });
 })

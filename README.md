@@ -5,6 +5,9 @@ Node.js binding for [librdkafka](https://github.com/edenhill/librdkafka).
 Only connect and produce are implemented so far.  consume will be forthcoming (but no immediate need)
 
 ## KAFKA SETUP
+
+Tested with kafka_2.8.0-0.8.0-beta1
+
 From kafka folder
 
 ### start servers

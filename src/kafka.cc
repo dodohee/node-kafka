@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 #include <syslog.h>
+#include <stdarg.h>
+#include <cstdlib>
 
 extern "C" {
   #include <rdkafka.h>

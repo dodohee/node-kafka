@@ -1,7 +1,7 @@
 var kafka = require("./lib/kafka");
 
 var producer = new kafka.Producer({
-  brokers: "localhost:9092",
+  brokers: process.env.BROKERS || "localhost:9092",
   partition: 0,
   topic: "test"
 });

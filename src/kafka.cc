@@ -55,20 +55,29 @@ static void debug(const char* format, ...) {
 
     time(&rawtime);
     timeinfo = localtime(&rawtime);
-    strftime (timestamp, 80, "kafka - %D %H:%M:%S - ", timeinfo);
+    strftime(timestamp, 80, "kafka - %D %H:%M:%S - ", timeinfo);
     printf(timestamp);
     vprintf(format, args);
   }
   va_end(args);
 }
 
+void produceFree(uv_handle_t* w) {
+  debug("produceFree start\n");
+  uv_unref(w);
+  ProduceBaton* baton = (ProduceBaton*)w->data;
+  baton->id = -1;
+  baton->callback.Dispose();
+  baton->emitter.Dispose();
+  delete baton;
+  debug("produceFree end\n");
+}
+
 static void produceAsyncDelivery(uv_async_t* w, int revents) {
   HandleScope scope;
   debug("produceAsyncDelivery start\n");
   
-  uv_unref((uv_handle_t*)w);
   ProduceBaton* baton = (ProduceBaton*)w->data;
-  w->data = 0;
   
   if (baton) {
     debug("produceAsyncDelivery with baton %d\n", baton->id);
@@ -96,11 +105,7 @@ static void produceAsyncDelivery(uv_async_t* w, int revents) {
   }
   if (baton) {
     debug("cleanup produce baton %d\n", baton->id);
-    uv_close((uv_handle_t*)&baton->async, NULL);
-    baton->id = -1;
-    baton->callback.Dispose();
-    baton->emitter.Dispose();
-    delete baton;
+    uv_close((uv_handle_t*)&baton->async, produceFree);
   }
   debug("produceAsyncDelivery end\n");
 }
@@ -282,6 +287,7 @@ connect(const Arguments &args) {
   int status = uv_queue_work(uv_default_loop(), req, ConnectAsyncWork, (uv_after_work_cb)ConnectAsyncAfter);
   
   if (status != 0) {
+    fprintf(stderr, "connect: couldn't queue work");
     debug("connect: couldn't queue work\n");
     Local<Value> err = Exception::Error(String::New("Could not queue work"));
     Local<Value> argv[] = { err };
@@ -399,6 +405,7 @@ produce(const Arguments &args) {
   
   debug("produce uv_queue_work %d\n", status);
   if (status != 0) {
+    fprintf(stderr, "produce uv_queue_work error\n");
     debug("produce: couldn't queue work");
     Local<Value> err = Exception::Error(String::New("Could not queue work for produce"));
     Local<Value> argv[] = { err };

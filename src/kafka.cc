@@ -208,11 +208,8 @@ void ConnectAsyncWork(uv_work_t* req) {
 void connectFree(uv_handle_t* w) {
   debug("connectFree start\n");
   ConnectBaton* baton = (ConnectBaton*)w->data;
-  debug("connectFree start 2 %p\n", baton);
   baton->callback.Dispose();
-  debug("connectFree start 3\n");
   delete baton;
-  debug("connectFree start 4\n");
   uv_unref(w);
   debug("connectFree end\n");
 }

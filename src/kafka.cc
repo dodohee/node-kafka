@@ -205,6 +205,19 @@ void ConnectAsyncWork(uv_work_t* req) {
 }
 
 
+void connectFree(uv_handle_t* w) {
+  debug("connectFree start\n");
+  ConnectBaton* baton = (ConnectBaton*)w->data;
+  debug("connectFree start 2 %p\n", baton);
+  baton->callback.Dispose();
+  debug("connectFree start 3\n");
+  delete baton;
+  debug("connectFree start 4\n");
+  uv_unref(w);
+  debug("connectFree end\n");
+}
+
+
 void ConnectAsyncAfter(uv_work_t* req) {
     HandleScope scope;
     ConnectBaton* baton = static_cast<ConnectBaton*>(req->data);
@@ -237,11 +250,11 @@ void ConnectAsyncAfter(uv_work_t* req) {
       callback->Call(Context::GetCurrent()->Global(), 2, argv);
     }
 
-    baton->callback.Dispose();
-    uv_close((uv_handle_t*)&baton->async, NULL);
-    delete baton;
+    baton->async.data = baton;
+    uv_close((uv_handle_t*)&baton->async, connectFree);
     debug("ConnectAsyncAfter end\n");
 }
+
 
 // this can never be called because uv_close has been called
 void connectAsyncCallback(uv_async_t* w, int revents) {
@@ -292,10 +305,7 @@ connect(const Arguments &args) {
     Local<Value> err = Exception::Error(String::New("Could not queue work"));
     Local<Value> argv[] = { err };
     baton->callback->Call(Context::GetCurrent()->Global(), 1, argv);
-    baton->callback.Dispose();
-    uv_close((uv_handle_t*)&baton->async, NULL);
-    delete baton;
-    delete req;
+    uv_close((uv_handle_t*)&baton->async, connectFree);
   }  
   
   return scope.Close(Undefined());
@@ -410,10 +420,7 @@ produce(const Arguments &args) {
     Local<Value> err = Exception::Error(String::New("Could not queue work for produce"));
     Local<Value> argv[] = { err };
     baton->callback->Call(Context::GetCurrent()->Global(), 1, argv);
-    baton->callback.Dispose();
-    uv_close((uv_handle_t*)&baton->async, NULL);
-    delete baton;
-    delete req;
+    uv_close((uv_handle_t*)&baton->async, produceFree);
   }
   return scope.Close(Undefined());
 }

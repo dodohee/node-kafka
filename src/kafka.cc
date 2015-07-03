@@ -8,14 +8,14 @@
 #include <cstdlib>
 
 extern "C" {
-  #include <rdkafka.h>
+  #include <librdkafka/rdkafka.h>
 }
 
 using namespace v8;
 using namespace node;
 
-rd_kafka_conf_t conf;
-rd_kafka_topic_conf_t topic_conf;
+rd_kafka_conf_t* conf;
+rd_kafka_topic_conf_t* topic_conf;
 char errstr[512];
 
 static int counter = 0;
@@ -119,9 +119,9 @@ static void msg_delivered(rd_kafka_t* rk, void* payload, size_t len, rd_kafka_re
     debug("msg_delivered without baton\n");
   }
   if (error_code) {
-    debug("%% Message delivery failed: %s\n", rd_kafka_err2str(rk, error_code));
+    debug("%% Message delivery failed: %s\n", rd_kafka_err2str(rd_kafka_errno2err(error_code)));
     baton->error = true;
-    baton->error_message = rd_kafka_err2str(rk, error_code);
+    baton->error_message = rd_kafka_err2str(rd_kafka_errno2err(error_code));
   } else {
     debug("%% Message delivered (%zd bytes)\n", len);
     baton->delivered_length = len;
@@ -168,7 +168,7 @@ void ConnectAsyncWork(uv_work_t* req) {
   debug("ConnectAsyncWork start\n");
   ConnectBaton* baton = static_cast<ConnectBaton*>(req->data);
 
-  if (!(baton->rk = rd_kafka_new(RD_KAFKA_PRODUCER, &conf, errstr, sizeof(errstr)))) {
+  if (!(baton->rk = rd_kafka_new(RD_KAFKA_PRODUCER, conf, errstr, sizeof(errstr)))) {
     fprintf(stderr, "%% Failed to create new producer: %s\n", errstr);
     exit(1);
   }
@@ -191,7 +191,7 @@ void ConnectAsyncWork(uv_work_t* req) {
   }
 
   /* Create topic */
-  baton->rkt = rd_kafka_topic_new(baton->rk, baton->topic.c_str(), &topic_conf);
+  baton->rkt = rd_kafka_topic_new(baton->rk, baton->topic.c_str(), topic_conf);
   if (!baton->rkt) {
     fprintf(stderr, "%% can't create topic\n");
     exit(1);
@@ -426,21 +426,21 @@ extern "C" void init(Handle<Object> target) {
   HandleScope scope;
   
   // Kafka configuration Base configuration on the default config.
-  rd_kafka_defaultconf_set(&conf);
+  conf = rd_kafka_conf_new();
   
   // Set up a message delivery report callback.
   // It will be called once for each message, either on succesful delivery to broker,
   // or upon failure to deliver to broker.
-  conf.producer.dr_cb = msg_delivered;
+  rd_kafka_conf_set_dr_cb(conf, msg_delivered);
   
-  if (rd_kafka_conf_set(&conf, "debug", "all", errstr, sizeof(errstr)) != RD_KAFKA_CONF_OK) {
+  if (rd_kafka_conf_set(conf, "debug", "all", errstr, sizeof(errstr)) != RD_KAFKA_CONF_OK) {
     debug("%% Debug configuration failed: %s\n", errstr);
     exit(1);
   }
   
   // Topic configuration
   // Base topic configuration on the default topic config.
-  rd_kafka_topic_defaultconf_set(&topic_conf);
+  topic_conf = rd_kafka_topic_conf_new();
   
   NODE_SET_METHOD(target, "produce", produce);
   NODE_SET_METHOD(target, "consume", consume);

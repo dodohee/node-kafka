@@ -5,12 +5,6 @@
       'sources': [
         'src/kafka.cc',
       ],
-      'include_dirs': [
-        'deps/librdkafka'
-      ],
-      'dependencies': [
-        'deps/librdkafka/librdkafka.gyp:librdkafka'
-      ],
       'cflags_cc': [
         '-Wall',
         '-O3'
@@ -29,13 +23,13 @@
               'MACOSX_DEPLOYMENT_TARGET': '10.7',
               'GCC_ENABLE_CPP_EXCEPTIONS': 'YES'
             },
-            'libraries' : ['-lpthread -lz -lc']
+            'libraries' : ['-lrdkafka -lpthread -lz -lc']
           }
         ],
         [
           'OS=="linux"', 
           {
-            'libraries' : ['-lpthread -lz -lc -lrt']
+            'libraries' : ['-lrdkafka -lpthread -lz -lc -lrt']
           }
         ],
       ]

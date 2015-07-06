@@ -1,7 +1,7 @@
 {
   "name": "node-kafka",
   "description": "a node binding for librdkafka",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "homepage": "https://github.com/sutoiku/node-kafka",
   "author": "Pascal Belloncle, psq@stoic.com",
   "contributors": [
@@ -21,13 +21,12 @@
   "engines": {
     "node": ">=0.10.x"
   },
-  "bin": {
-  },
+  "bin": {},
   "readmeFilename": "README.md",
   "scripts": {
     "install": "node-gyp rebuild"
   },
-  "gypfile": true,  
+  "gypfile": true,
   "bugs": "https://github.com/sutoiku/node-kafka/issues",
   "licenses": [
     {

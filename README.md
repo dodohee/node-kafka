@@ -1,6 +1,6 @@
 # node-kafka
 
-Node.js binding for [librdkafka](https://github.com/edenhill/librdkafka).
+Node.js binding for [librdkafka](https://github.com/edenhill/librdkafka).  At this time, only the version of V8 included in node 0.10.x is supported.
 
 Only connect and produce are implemented so far.  consume will be forthcoming (but no immediate need)
 
